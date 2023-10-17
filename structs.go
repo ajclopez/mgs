@@ -20,7 +20,7 @@ type SearchCriteria struct {
 	Prefix bool
 	// key is a string that allows the key to be identified in the search criteria.
 	Key string
-	// Operation is a structure that containg operator type.
+	// Operation is a structure that containing operator type.
 	Operation SearchOperator
 	// Value is a string that allows the value to be identified in the search criteria.
 	Value string

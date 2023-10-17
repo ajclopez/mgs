@@ -1,4 +1,4 @@
-[![MIT License][license-shield]][license-url]
+[![Go Reference](https://pkg.go.dev/badge/github.com/ajclopez/mgs.svg)](https://pkg.go.dev/github.com/ajclopez/mgs) [![GitHub release (with filter)](https://img.shields.io/github/v/release/ajclopez/mgs)](https://github.com/ajclopez/mgs/releases) [![Go Report](https://goreportcard.com/badge/ajclopez/mgs)](https://goreportcard.com/report/ajclopez/mgs) [![codecov](https://codecov.io/gh/ajclopez/mgs/graph/badge.svg?token=PGKFDNP677)](https://codecov.io/gh/ajclopez/mgs) [![MIT License][license-shield]][license-url]
 
 <p align="center">
   <h3 align="center">Mongo Golang Search</h3>
@@ -14,8 +14,9 @@
   </p>
 </p>
 
-# Mongo Golang Search (mgs)
+-------------------------
 
+# Mongo Golang Search (mgs)
 
 ### Content index
 
@@ -44,9 +45,105 @@ You could also use **Mongo Golang Search** to searching, sorting, pagination and
 
 ### Installation
 
+The recommended way to get started using the Mongo Golang Search is by using Go modules to install the dependency in your project. This can be done either by importing packages from github.com/ajclopez/mgs and having the build step install the dependency or by explicitly running
+
+```go
+go get github.com/ajclopez/mgs
+```
 
 ## Usage
 
+To get started with the mgs, import the mgs package and use a mgs.MongoGoSearch function:
+
+```go
+mgs.MongoGoSearch(query string, opts *FindOptions)
+```
+
+##### Arguments
+`query`: query string part of the requested API URL.
+
+`opts`: object for advanced configuration [See below](#available-options) [optional].
+
+Using `mgs.MongoGoSearch` function with [mongo-go-driver](https://github.com/mongodb/mongo-go-driver) library to filter, sort, limit and skip in MongoDB:
+
+```go
+import (
+    "context"
+
+    "github.com/ajclopez/mgs"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+opts := mgs.FindOption()
+result, err := mgs.MongoGoSearch(query, opts)
+
+...
+
+findOpts := options.Find()
+findOpts.SetLimit(result.Limit)
+findOpts.SetSkip(result.Skip)
+findOpts.SetSort(result.Sort)
+findOpts.SetProjection(result.Projection)
+
+cur, err := collection.Find(context.TODO(), result.Filter, findOpts)
+
+...
+```
+
+Using optional configurations:
+
+```go
+import (
+    "context"
+
+    "github.com/ajclopez/mgs"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+opts := mgs.FindOption()
+opts.SetCaster(map[string]mgs.CastType{
+	"mobile": mgs.STRING,
+})
+opts.SetMaxLimit(1000)
+opts.SetDefaultLimit(10)
+result, err := mgs.MongoGoSearch(query, opts)
+
+...
+
+findOpts := options.Find()
+findOpts.SetLimit(result.Limit)
+findOpts.SetSkip(result.Skip)
+findOpts.SetSort(result.Sort)
+findOpts.SetProjection(result.Projection)
+
+cur, err := collection.Find(context.TODO(), result.Filter, findOpts)
+
+...
+```
+
+##### Example
+
+A request of the form:
+```js
+"employees?status=sent&date>2020-01-06T14:00:00.000Z&author.firstname=Jhon&skip=50&limit=100&sort=-date&fields=id,date";
+```
+
+Is translated to:
+```Go
+Query{
+    Filter: map[string]interface{}{
+        "author.firstname":     "John",
+        "date":                 map[string]interface{}{"$gt": "2020-01-06T14:00:00.000Z"},
+        "status":               "SENT",
+    },
+    Sort:  map[string]int{
+        "date": 1,
+        "id": 1
+    },
+    Limit: 100,
+    Skip:  50,
+}
+```
 
 ## Supported features
 
@@ -111,11 +208,52 @@ fields=firstname,lastname,phone,email
 
 You can use advanced options:
 
+```go
+opts := mgs.FindOption()
+opts.SetCaster(map[string]mgs.CastType{
+	"mobile": mgs.STRING,
+})
+opts.SetMaxLimit(100)
+opts.SetDefaultLimit(10)
+```
+
+* `FindOption` creates a new FindOptions instance.
+* `SetCaster` object to specify custom casters, key is the caster name, and value is a type (`BOOLEAN, NUMBER, PATTERN, DATE, STRING`).
+* `SetDefaultLimit` which contains custom value to return records.
+* `SetMaxLimit` which contains custom value to return a maximum of records.
+
 ### Customize limit value
 
+You can specify your own maximum or default limit value.
+
+* `defaultLimit`: custom value to return records.
+* `maxLimit`: custom value to return a maximum of records.
+
+```go
+opts := mgs.FindOption()
+opts.SetMaxLimit(1000)
+opts.SetDefaultLimit(10)
+
+result, err := mgs.MongoGoSearch("city=Madrid&skip=10&limit=1000", opts)
+```
 
 ### Specify casting per param keys
 
+You can specify how query parameter values are casted by passing an object.
+
+* `casters`: object which map keys to casters.
+
+```go
+opts := mgs.FindOption()
+opts.SetCaster(map[string]mgs.CastType{
+	"key1": mgs.STRING,
+    "key2": mgs.NUMBER,
+    "key3": mgs.STRING,
+    "key4": mgs.BOOLEAN
+})
+
+result, err := mgs.MongoGoSearch("key1=VALUE&key2=10&key3=20&key4=true", opts)
+```
 
 ## Contributing
 
