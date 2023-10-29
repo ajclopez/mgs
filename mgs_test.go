@@ -19,7 +19,7 @@ var tests = []struct {
 		"skip=10",
 		result{
 			Query{
-				Filter:     map[string]interface{}{},
+				Filter:     map[string][]interface{}{},
 				Sort:       map[string]int(nil),
 				Limit:      0,
 				Skip:       10,
@@ -32,7 +32,7 @@ var tests = []struct {
 		"skip=number",
 		result{
 			Query{
-				Filter:     map[string]interface{}(nil),
+				Filter:     map[string][]interface{}(nil),
 				Sort:       map[string]int(nil),
 				Limit:      0,
 				Skip:       0,
@@ -45,7 +45,7 @@ var tests = []struct {
 		"limit=25",
 		result{
 			Query{
-				Filter:     map[string]interface{}{},
+				Filter:     map[string][]interface{}{},
 				Sort:       map[string]int(nil),
 				Limit:      25,
 				Skip:       0,
@@ -58,7 +58,7 @@ var tests = []struct {
 		"limit=number",
 		result{
 			Query{
-				Filter:     map[string]interface{}(nil),
+				Filter:     map[string][]interface{}(nil),
 				Sort:       map[string]int(nil),
 				Limit:      0,
 				Skip:       0,
@@ -71,7 +71,7 @@ var tests = []struct {
 		"sort=+date,-age,name",
 		result{
 			Query{
-				Filter: map[string]interface{}{},
+				Filter: map[string][]interface{}{},
 				Sort: map[string]int{
 					"date": 1,
 					"age":  -1,
@@ -88,7 +88,7 @@ var tests = []struct {
 		"fields=firstname,lastname,email",
 		result{
 			Query{
-				Filter: map[string]interface{}{},
+				Filter: map[string][]interface{}{},
 				Sort:   map[string]int(nil),
 				Limit:  0,
 				Skip:   0,
@@ -105,10 +105,64 @@ var tests = []struct {
 		"city=Madrid&age>=18",
 		result{
 			Query{
-				Filter: map[string]interface{}{
-					"city": "Madrid",
-					"age": map[string]interface{}{
-						"$gte": int64(18),
+				Filter: map[string][]interface{}{
+					"$and": {
+						map[string]interface{}{
+							"city": "Madrid",
+						},
+						map[string]interface{}{
+							"age": map[string]interface{}{
+								"$gte": int64(18),
+							},
+						},
+					},
+				},
+				Sort:       map[string]int(nil),
+				Limit:      0,
+				Skip:       0,
+				Projection: map[string]int(nil),
+			},
+			nil,
+		},
+	},
+	{
+		"filter=gender = female",
+		result{
+			Query{
+				Filter: map[string][]interface{}{
+					"$and": {
+						map[string]interface{}{
+							"gender": "female",
+						},
+					},
+				},
+				Sort:       map[string]int(nil),
+				Limit:      0,
+				Skip:       0,
+				Projection: map[string]int(nil),
+			},
+			nil,
+		},
+	},
+	{
+		"filter=(city = Madrid or city = Santiago) and gender = female",
+		result{
+			Query{
+				Filter: map[string][]interface{}{
+					"$and": {
+						map[string][]interface{}{
+							"$or": {
+								map[string]interface{}{
+									"city": "Madrid",
+								},
+								map[string]interface{}{
+									"city": "Santiago",
+								},
+							},
+						},
+						map[string]interface{}{
+							"gender": "female",
+						},
 					},
 				},
 				Sort:       map[string]int(nil),
@@ -161,8 +215,12 @@ func TestReturnQueryUseFindOptionsWithCaster(t *testing.T) {
 
 	expected := result{
 		Query{
-			Filter: map[string]interface{}{
-				"mobile": "+56900000000",
+			Filter: map[string][]interface{}{
+				"$and": {
+					map[string]interface{}{
+						"mobile": "+56900000000",
+					},
+				},
 			},
 			Sort:       map[string]int(nil),
 			Limit:      0,
@@ -185,7 +243,7 @@ func TestReturnQueryUseFindOptionsWithDefaultLimit(t *testing.T) {
 
 	expected := result{
 		Query{
-			Filter:     map[string]interface{}{},
+			Filter:     map[string][]interface{}{},
 			Sort:       map[string]int(nil),
 			Limit:      10,
 			Skip:       0,
@@ -207,7 +265,7 @@ func TestReturnQueryUseFindOptionsWithMaxLimit(t *testing.T) {
 
 	expected := result{
 		Query{
-			Filter:     map[string]interface{}{},
+			Filter:     map[string][]interface{}{},
 			Sort:       map[string]int(nil),
 			Limit:      500,
 			Skip:       0,

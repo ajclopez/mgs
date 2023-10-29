@@ -5,9 +5,10 @@ import (
 )
 
 // Convert converts the criteria value to a MongoDB query
-func Convert(criteria SearchCriteria, filter map[string]interface{}) {
+func Convert(criteria SearchCriteria) map[string]interface{} {
 
 	value := ParseValue(criteria.Value, criteria.Caster)
+	filter := make(map[string]interface{})
 
 	switch criteria.Operation {
 	case EQUAL:
@@ -39,6 +40,8 @@ func Convert(criteria SearchCriteria, filter map[string]interface{}) {
 	case EXISTS:
 		filter[criteria.Key] = buildMongoQuery("$exists", !criteria.Prefix)
 	}
+
+	return filter
 }
 
 func buildMongoQuery(operator string, value interface{}) map[string]interface{} {

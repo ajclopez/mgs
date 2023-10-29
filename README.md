@@ -29,6 +29,7 @@
     * [Pagination](#pagination)
     * [Sorting](#sorting)
     * [Projection](#projection)
+    * [Advanced queries](#advanced-queries)
 * [Available options](#available-options)
     * [Customize limit value](#customize-limit-value)
     * [Specify casting per param keys](#specify-casting-per-param-keys)
@@ -203,6 +204,21 @@ fields=firstname,lastname,phone,email
 
 **Note:**
 * The `_id` field (returned by default).
+
+### Advanced queries
+
+For more advanced usage (`and`, `or` logic operations), pass query `filter` as string with the logical operations, for example:
+
+```json
+filter=(country=Mexico OR country=Spain) and gender=female
+````
+
+##### What operations are possible?
+
+* Filtering operations.
+* The `AND/and` operator.
+* The `OR/or` operator.
+* Parenthesis can be used for grouping.
 
 ## Available options
 

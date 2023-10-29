@@ -12,12 +12,13 @@ const DATE_FORMAT = "2006-01-02T15:04:05.000Z"
 func Parse(query string, caster *map[string]CastType) []SearchCriteria {
 	criteria := []SearchCriteria{}
 	for _, condition := range strings.Split(query, "&") {
-		criteria = append(criteria, criteriaParser(condition, caster))
+		criteria = append(criteria, CriteriaParser(condition, caster))
 	}
 	return criteria
 }
 
-func criteriaParser(condition string, caster *map[string]CastType) SearchCriteria {
+// CriteriaParser build criteria from a condition expression
+func CriteriaParser(condition string, caster *map[string]CastType) SearchCriteria {
 
 	pattern := GetOperatorPattern()
 	match := pattern.FindStringSubmatch(condition)

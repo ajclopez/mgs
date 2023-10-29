@@ -3,7 +3,7 @@ package mgs
 // Query is a structure that holds information about DB request.
 type Query struct {
 	// Filter is a document containing query operators.
-	Filter map[string]interface{}
+	Filter map[string][]interface{}
 	// Sort is a document specifying the order in which documents should be returned.
 	Sort map[string]int
 	// Limit is the maximum number of documents to return.
