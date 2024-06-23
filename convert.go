@@ -5,9 +5,9 @@ import (
 )
 
 // Convert converts the criteria value to a MongoDB query
-func Convert(criteria SearchCriteria) map[string]interface{} {
+func Convert(criteria SearchCriteria, qh *QueryHandler) map[string]interface{} {
 
-	value := ParseValue(criteria.Value, criteria.Caster)
+	value := ParseValue(criteria.Value, qh, criteria.Caster)
 	filter := make(map[string]interface{})
 
 	switch criteria.Operation {

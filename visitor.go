@@ -10,12 +10,14 @@ import (
 
 type Visitor struct {
 	*parser.BaseQueryVisitor
-	Caster *map[string]CastType
+	QueryHandler *QueryHandler
+	Caster       *map[string]CastType
 }
 
-func NewGeneratorVisitor(caster *map[string]CastType) *Visitor {
+func NewGeneratorVisitor(qh *QueryHandler, caster *map[string]CastType) *Visitor {
 	return &Visitor{
-		Caster: caster,
+		QueryHandler: qh,
+		Caster:       caster,
 	}
 }
 
@@ -96,5 +98,5 @@ func (v *Visitor) VisitCriteria(ctx *parser.CriteriaContext) interface{} {
 	expression := fmt.Sprintf("%s%s%s", strings.TrimSpace(key.GetText()), strings.TrimSpace(op.GetText()), strings.TrimSpace(value.GetText()))
 	criteria := CriteriaParser(expression, v.Caster)
 
-	return Convert(criteria)
+	return Convert(criteria, v.QueryHandler)
 }

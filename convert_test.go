@@ -113,7 +113,7 @@ var converetTests = []struct {
 
 func TestShouldConvertFromSearchCriteria(t *testing.T) {
 	for _, test := range converetTests {
-		result := Convert(test.Criteria)
+		result := Convert(test.Criteria, queryHandler)
 		assert.Equal(t, test.Expected, result)
 	}
 }

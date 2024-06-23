@@ -1,6 +1,8 @@
 package mgs
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -102,6 +104,25 @@ var tests = []struct {
 		},
 	},
 	{
+		"_id=666f3a3ecf615a0f4d455411",
+		result{
+			Query{
+				Filter: map[string][]interface{}{
+					"$and": {
+						map[string]interface{}{
+							"_id": "ObjectID(\"666f3a3ecf615a0f4d455411\")",
+						},
+					},
+				},
+				Sort:       map[string]int(nil),
+				Limit:      0,
+				Skip:       0,
+				Projection: map[string]int(nil),
+			},
+			nil,
+		},
+	},
+	{
 		"city=Madrid&age>=18",
 		result{
 			Query{
@@ -175,8 +196,21 @@ var tests = []struct {
 	},
 }
 
+// MockPrimitives it is a mock of the Primitives for testing.
+type MockPrimitives struct{}
+
+func (mc *MockPrimitives) ObjectID(oidStr string) (interface{}, error) {
+	if oidStr == "666f3a3ecf615a0f4d455411" {
+		return fmt.Sprintf("ObjectID(\"%s\")", oidStr), nil
+	}
+
+	return nil, errors.New("Invalid ObjectId")
+}
+
+var queryHandler = NewQueryHandler(&MockPrimitives{})
+
 func TestReturnDefaultQueryForMongoGoSearchWhenQueryIsEmpty(t *testing.T) {
-	result, err := MongoGoSearch("", &FindOptions{})
+	result, err := queryHandler.MongoGoSearch("", &FindOptions{})
 
 	if err != nil {
 		t.Errorf("Error parse url to mongo query search")
@@ -186,7 +220,7 @@ func TestReturnDefaultQueryForMongoGoSearchWhenQueryIsEmpty(t *testing.T) {
 }
 
 func TestReturnErrorForMongoGoSearchWhenQueryInvalidCharacters(t *testing.T) {
-	result, err := MongoGoSearch("name=Jho%%n", &FindOptions{})
+	result, err := queryHandler.MongoGoSearch("name=Jho%%n", &FindOptions{})
 
 	if err == nil {
 		t.Errorf("Error parse url to mongo query search")
@@ -197,7 +231,7 @@ func TestReturnErrorForMongoGoSearchWhenQueryInvalidCharacters(t *testing.T) {
 
 func TestReturnQuery(t *testing.T) {
 	for _, test := range tests {
-		query, err := MongoGoSearch(test.Input, &FindOptions{})
+		query, err := queryHandler.MongoGoSearch(test.Input, &FindOptions{})
 
 		assert.Equal(t, test.Expected.Query, query)
 		assert.Equal(t, test.Expected.Err, err)
@@ -230,7 +264,7 @@ func TestReturnQueryUseFindOptionsWithCaster(t *testing.T) {
 		nil,
 	}
 
-	query, err := MongoGoSearch("mobile=+56900000000", opts)
+	query, err := queryHandler.MongoGoSearch("mobile=+56900000000", opts)
 
 	assert.Equal(t, expected.Query, query)
 	assert.Equal(t, expected.Err, err)
@@ -252,7 +286,7 @@ func TestReturnQueryUseFindOptionsWithDefaultLimit(t *testing.T) {
 		nil,
 	}
 
-	query, err := MongoGoSearch("limit=a", opts)
+	query, err := queryHandler.MongoGoSearch("limit=a", opts)
 
 	assert.Equal(t, expected.Query, query)
 	assert.Equal(t, expected.Err, err)
@@ -274,7 +308,7 @@ func TestReturnQueryUseFindOptionsWithMaxLimit(t *testing.T) {
 		nil,
 	}
 
-	query, err := MongoGoSearch("limit=2000", opts)
+	query, err := queryHandler.MongoGoSearch("limit=2000", opts)
 
 	assert.Equal(t, expected.Query, query)
 	assert.Equal(t, expected.Err, err)

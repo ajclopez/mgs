@@ -11,7 +11,7 @@ import (
 
 func TestShouldReturnErrForVisitInputWhenContextIsNil(t *testing.T) {
 	caster := map[string]CastType{}
-	visitor := NewGeneratorVisitor(&caster)
+	visitor := NewGeneratorVisitor(queryHandler, &caster)
 	result := visitor.VisitInput(nil)
 
 	assert.Equal(t, ErrQueryVisitor, result)
@@ -19,7 +19,7 @@ func TestShouldReturnErrForVisitInputWhenContextIsNil(t *testing.T) {
 
 func TestShouldReturnErrForVisitPriorityQueryWhenContextIsNil(t *testing.T) {
 	caster := map[string]CastType{}
-	visitor := NewGeneratorVisitor(&caster)
+	visitor := NewGeneratorVisitor(queryHandler, &caster)
 	result := visitor.VisitPriorityQuery(nil)
 
 	assert.Equal(t, ErrQueryVisitor, result)
@@ -27,7 +27,7 @@ func TestShouldReturnErrForVisitPriorityQueryWhenContextIsNil(t *testing.T) {
 
 func TestShouldReturnErrForVisitAtomQueryWhenContextIsNil(t *testing.T) {
 	caster := map[string]CastType{}
-	visitor := NewGeneratorVisitor(&caster)
+	visitor := NewGeneratorVisitor(queryHandler, &caster)
 	result := visitor.VisitAtomQuery(nil)
 
 	assert.Equal(t, ErrQueryVisitor, result)
@@ -35,7 +35,7 @@ func TestShouldReturnErrForVisitAtomQueryWhenContextIsNil(t *testing.T) {
 
 func TestShouldReturnErrForVisitOpQueryWhenContextIsNil(t *testing.T) {
 	caster := map[string]CastType{}
-	visitor := NewGeneratorVisitor(&caster)
+	visitor := NewGeneratorVisitor(queryHandler, &caster)
 	result := visitor.VisitOpQuery(nil)
 
 	assert.Equal(t, ErrQueryVisitor, result)
@@ -43,7 +43,7 @@ func TestShouldReturnErrForVisitOpQueryWhenContextIsNil(t *testing.T) {
 
 func TestShouldReturnErrForVisitCriteriaWhenContextIsNil(t *testing.T) {
 	caster := map[string]CastType{}
-	visitor := NewGeneratorVisitor(&caster)
+	visitor := NewGeneratorVisitor(queryHandler, &caster)
 	result := visitor.VisitCriteria(nil)
 
 	assert.Equal(t, ErrQueryVisitor, result)
@@ -51,7 +51,7 @@ func TestShouldReturnErrForVisitCriteriaWhenContextIsNil(t *testing.T) {
 
 func TestShouldReturnErrForVisitCriteriaWhenKeyContextIsNil(t *testing.T) {
 	caster := map[string]CastType{}
-	visitor := NewGeneratorVisitor(&caster)
+	visitor := NewGeneratorVisitor(queryHandler, &caster)
 
 	criteriaContext := &parser.CriteriaContext{
 		BaseParserRuleContext: *antlr.NewBaseParserRuleContext(nil, -1),

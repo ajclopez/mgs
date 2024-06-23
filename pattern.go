@@ -6,7 +6,6 @@ import (
 
 const OPERATOR_PATTERN string = "(?P<Prefix>!?)(?P<Key>[^><!=]+)(?P<Operator>[><]=?|!?=|)(?P<Value>.*)"
 
-// const REGEX_PATTERN string = "^/(?P<Pattern>.*)(?P<Option>[igm]*)/$"
 const REGEX_PATTERN string = "^\\/(?P<Pattern>.*)\\/(?P<Option>[igm]*)$"
 
 var operator *regexp.Regexp = nil

@@ -20,21 +20,21 @@
 
 ### Content index
 
-* [What is this?](#what-is-this)
-* [Getting Started](#getting-started)
-    *  [Installation](#installation)
-* [Usage](#usage)
-* [Supported features](#supported-features)
-    * [Filtering](#filtering)
-    * [Pagination](#pagination)
-    * [Sorting](#sorting)
-    * [Projection](#projection)
-    * [Advanced queries](#advanced-queries)
-* [Available options](#available-options)
-    * [Customize limit value](#customize-limit-value)
-    * [Specify casting per param keys](#specify-casting-per-param-keys)
-* [Contributing](#contributing)
-* [License](#license)
+- [What is this?](#what-is-this)
+- [Getting Started](#getting-started)
+  - [Installation](#installation)
+- [Usage](#usage)
+- [Supported features](#supported-features)
+  - [Filtering](#filtering)
+  - [Pagination](#pagination)
+  - [Sorting](#sorting)
+  - [Projection](#projection)
+  - [Advanced queries](#advanced-queries)
+- [Available options](#available-options)
+  - [Customize limit value](#customize-limit-value)
+  - [Specify casting per param keys](#specify-casting-per-param-keys)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## What is this?
 
@@ -54,13 +54,30 @@ go get github.com/ajclopez/mgs
 
 ## Usage
 
-To get started with the mgs, import the mgs package and use a mgs.MongoGoSearch function:
+To get started with mgs, import the mgs package and implement the Primitives ObjectID function which is used to convert strings to ObjectID.
 
 ```go
-mgs.MongoGoSearch(query string, opts *FindOptions)
+type Primitives struct{}
+
+func (primitives *Primitives) ObjectID(oidStr string) (interface{}, error) {
+	return ObjectID() // invoke ObjectID from MongoDB Driver
+}
+```
+
+Then create an instance of `QueryHandler`:
+
+```go
+queryHandler := mgs.NewQueryHandler(&Primitives{})
+```
+
+Finally use a mgs.MongoGoSearch function:
+
+```go
+queryHandler.MongoGoSearch(query string, opts *FindOptions)
 ```
 
 ##### Arguments
+
 `query`: query string part of the requested API URL.
 
 `opts`: object for advanced configuration [See below](#available-options) [optional].
@@ -72,11 +89,20 @@ import (
     "context"
 
     "github.com/ajclopez/mgs"
-	"go.mongodb.org/mongo-driver/mongo/options"
+    "go.mongodb.org/mongo-driver/bson/primitive"
+    "go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type Primitives struct{}
+
+func (primitives *Primitives) ObjectID(oidStr string) (interface{}, error) {
+	return primitive.ObjectIDFromHex(oidStr)
+}
+
+queryHandler := mgs.NewQueryHandler(&Primitives{})
+
 opts := mgs.FindOption()
-result, err := mgs.MongoGoSearch(query, opts)
+result, err := queryHandler.MongoGoSearch(query, opts)
 
 ...
 
@@ -98,8 +124,17 @@ import (
     "context"
 
     "github.com/ajclopez/mgs"
-	"go.mongodb.org/mongo-driver/mongo/options"
+    "go.mongodb.org/mongo-driver/bson/primitive"
+    "go.mongodb.org/mongo-driver/mongo/options"
 )
+
+type Primitives struct{}
+
+func (primitives *Primitives) ObjectID(oidStr string) (interface{}, error) {
+	return primitive.ObjectIDFromHex(oidStr)
+}
+
+queryHandler := mgs.NewQueryHandler(&Primitives{})
 
 opts := mgs.FindOption()
 opts.SetCaster(map[string]mgs.CastType{
@@ -107,7 +142,7 @@ opts.SetCaster(map[string]mgs.CastType{
 })
 opts.SetMaxLimit(1000)
 opts.SetDefaultLimit(10)
-result, err := mgs.MongoGoSearch(query, opts)
+result, err := queryHandler.MongoGoSearch(query, opts)
 
 ...
 
@@ -125,11 +160,13 @@ cur, err := collection.Find(context.TODO(), result.Filter, findOpts)
 ##### Example
 
 A request of the form:
+
 ```js
-"employees?status=sent&date>2020-01-06T14:00:00.000Z&author.firstname=Jhon&skip=50&limit=100&sort=-date&fields=id,date";
+'employees?status=sent&date>2020-01-06T14:00:00.000Z&author.firstname=Jhon&skip=50&limit=100&sort=-date&fields=id,date';
 ```
 
 Is translated to:
+
 ```Go
 Query{
     Filter: map[string]interface{}{
@@ -150,21 +187,20 @@ Query{
 
 ### Filtering
 
-| Operator      	| URI               	| Example                        	|
-| -----------------	| ---------------------	| ---------------------------------	|
-| `$eq`          	| `key=val`				| `type=public`        				|
-| `$ne`          	| `key!=val`        	| `status!=SENT`                    |
-| `$gt`          	| `key>val`             | `price>5`                        |
-| `$gte`         	| `key>=val`            | `price>=9`                       |
-| `$lt`          	| `key<val`             | `date<2020-01-01T14:00:00.000Z`   |
-| `$lte`         	| `key<=val`            | `priority<=-5`                    |
-| `$in`          	| `key=val1,val2`       | `status=QUEUED,DEQUEUED`          |
-| `$nin`          	| `key!=val1,val2`      | `status!=QUEUED,DEQUEUED`         |
-| `$exists`         | `key`          		| `email`              				|
-| `$exists`         | `!key`         		| `!email`                    		|
-| `$regex`      	| `key=/value/<opts>`	| `email=/@gmail\.com$/`			|
-| `$regex`        	| `key!=/value/<opts>`  | `phone!=/^58/`                    |
-
+| Operator  | URI                  | Example                         |
+| --------- | -------------------- | ------------------------------- |
+| `$eq`     | `key=val`            | `type=public`                   |
+| `$ne`     | `key!=val`           | `status!=SENT`                  |
+| `$gt`     | `key>val`            | `price>5`                       |
+| `$gte`    | `key>=val`           | `price>=9`                      |
+| `$lt`     | `key<val`            | `date<2020-01-01T14:00:00.000Z` |
+| `$lte`    | `key<=val`           | `priority<=-5`                  |
+| `$in`     | `key=val1,val2`      | `status=QUEUED,DEQUEUED`        |
+| `$nin`    | `key!=val1,val2`     | `status!=QUEUED,DEQUEUED`       |
+| `$exists` | `key`                | `email`                         |
+| `$exists` | `!key`               | `!email`                        |
+| `$regex`  | `key=/value/<opts>`  | `email=/@gmail\.com$/`          |
+| `$regex`  | `key!=/value/<opts>` | `phone!=/^58/`                  |
 
 ### Pagination
 
@@ -203,7 +239,8 @@ fields=firstname,lastname,phone,email
 ```
 
 **Note:**
-* The `_id` field (returned by default).
+
+- The `_id` field (returned by default).
 
 ### Advanced queries
 
@@ -211,14 +248,14 @@ For more advanced usage (`and`, `or` logic operations), pass query `filter` as s
 
 ```json
 filter=(country=Mexico OR country=Spain) and gender=female
-````
+```
 
 ##### What operations are possible?
 
-* Filtering operations.
-* The `AND/and` operator.
-* The `OR/or` operator.
-* Parenthesis can be used for grouping.
+- Filtering operations.
+- The `AND/and` operator.
+- The `OR/or` operator.
+- Parenthesis can be used for grouping.
 
 ## Available options
 
@@ -233,17 +270,17 @@ opts.SetMaxLimit(100)
 opts.SetDefaultLimit(10)
 ```
 
-* `FindOption` creates a new FindOptions instance.
-* `SetCaster` object to specify custom casters, key is the caster name, and value is a type (`BOOLEAN, NUMBER, PATTERN, DATE, STRING`).
-* `SetDefaultLimit` which contains custom value to return records.
-* `SetMaxLimit` which contains custom value to return a maximum of records.
+- `FindOption` creates a new FindOptions instance.
+- `SetCaster` object to specify custom casters, key is the caster name, and value is a type (`BOOLEAN, NUMBER, PATTERN, DATE, STRING`).
+- `SetDefaultLimit` which contains custom value to return records.
+- `SetMaxLimit` which contains custom value to return a maximum of records.
 
 ### Customize limit value
 
 You can specify your own maximum or default limit value.
 
-* `defaultLimit`: custom value to return records.
-* `maxLimit`: custom value to return a maximum of records.
+- `defaultLimit`: custom value to return records.
+- `maxLimit`: custom value to return a maximum of records.
 
 ```go
 opts := mgs.FindOption()
@@ -257,7 +294,7 @@ result, err := mgs.MongoGoSearch("city=Madrid&skip=10&limit=1000", opts)
 
 You can specify how query parameter values are casted by passing an object.
 
-* `casters`: object which map keys to casters.
+- `casters`: object which map keys to casters.
 
 ```go
 opts := mgs.FindOption()
@@ -284,7 +321,6 @@ Should you like to provide any feedback, please open up an Issue, I appreciate f
 ## License
 
 This software is released under the MIT license. See `LICENSE` for more information.
-
 
 [license-shield]: https://img.shields.io/badge/License-MIT-yellow.svg
 [license-url]: https://github.com/ajclopez/mgs/blob/master/LICENSE

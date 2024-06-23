@@ -39,10 +39,10 @@ func CriteriaParser(condition string, caster *map[string]CastType) SearchCriteri
 }
 
 // ParseValue converts a string to a data type
-func ParseValue(value string, cast *CastType) interface{} {
+func ParseValue(value string, qh *QueryHandler, cast *CastType) interface{} {
 
 	if cast == nil {
-		return parseValue(value)
+		return parseValue(value, qh)
 	}
 
 	switch option := *cast; option {
@@ -73,10 +73,10 @@ func ParseValue(value string, cast *CastType) interface{} {
 		return value
 	}
 
-	return parseValue(value)
+	return parseValue(value, qh)
 }
 
-func parseValue(value string) interface{} {
+func parseValue(value string, qh *QueryHandler) interface{} {
 
 	if strings.EqualFold(value, "true") || strings.EqualFold(value, "false") {
 		if b, err := strconv.ParseBool(strings.ToLower(value)); err == nil {
@@ -105,7 +105,7 @@ func parseValue(value string) interface{} {
 	if len(list) > 1 {
 		var characters []interface{}
 		for _, _value := range list {
-			characters = append(characters, parseValue(_value))
+			characters = append(characters, parseValue(_value, qh))
 		}
 		if len(characters) > 0 {
 			return characters
@@ -117,6 +117,11 @@ func parseValue(value string) interface{} {
 			Pattern: match[GetRegexPattern().SubexpIndex("Pattern")],
 			Option:  match[GetRegexPattern().SubexpIndex("Option")],
 		}
+	}
+
+	objectId, err := qh.Primitives.ObjectID(value)
+	if err == nil {
+		return objectId
 	}
 
 	return value

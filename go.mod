@@ -3,7 +3,6 @@ module github.com/ajclopez/mgs
 go 1.21.2
 
 require (
-	github.com/antlr/antlr4/runtime/Go/antlr v1.4.10
 	github.com/antlr4-go/antlr/v4 v4.13.0
 	github.com/stretchr/testify v1.8.4
 )

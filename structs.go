@@ -35,3 +35,8 @@ type Regex struct {
 	// Opetion is a string contains regex options should be used.
 	Option string
 }
+
+// QueryHandler handles query construction for MongoDB.
+type QueryHandler struct {
+	Primitives Primitives
+}

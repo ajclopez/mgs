@@ -19,8 +19,15 @@ var (
 	ErrQueryVisitor = errors.New("context does not exists")
 )
 
+// NewQueryHandler creates a new QueryHandler instance.
+func NewQueryHandler(primitives Primitives) *QueryHandler {
+	return &QueryHandler{
+		Primitives: primitives,
+	}
+}
+
 // MongoGoSearch converts query into a MongoDB query object.
-func MongoGoSearch(query string, opts *FindOptions) (Query, error) {
+func (qh *QueryHandler) MongoGoSearch(query string, opts *FindOptions) (Query, error) {
 
 	res := Query{}
 
@@ -41,7 +48,7 @@ func MongoGoSearch(query string, opts *FindOptions) (Query, error) {
 	for _, criteria := range Parse(query, opts.Caster) {
 		switch criteria.Key {
 		case "filter":
-			filterAdvanced = parseFilterAdvanced(criteria.Value, opts.Caster)
+			filterAdvanced = parseFilterAdvanced(criteria.Value, qh, opts.Caster)
 		case "skip":
 			err = parseSkip(&res, criteria.Value)
 		case "limit":
@@ -51,7 +58,7 @@ func MongoGoSearch(query string, opts *FindOptions) (Query, error) {
 		case "fields":
 			parseFields(&res, criteria.Value)
 		default:
-			filters = append(filters, Convert(criteria))
+			filters = append(filters, Convert(criteria, qh))
 		}
 
 		if err != nil {
@@ -137,13 +144,13 @@ func parseFields(res *Query, value string) {
 	res.Projection = projection
 }
 
-func parseFilterAdvanced(value string, caster *map[string]CastType) map[string][]interface{} {
+func parseFilterAdvanced(value string, qh *QueryHandler, caster *map[string]CastType) map[string][]interface{} {
 
 	is := antlr.NewInputStream(value)
 	lexer := parser.NewQueryLexer(is)
 	tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
 	parser := parser.NewQueryParser(tokens)
-	visitor := NewGeneratorVisitor(caster)
+	visitor := NewGeneratorVisitor(qh, caster)
 
 	tree := parser.Input()
 	result := visitor.Visit(tree)
