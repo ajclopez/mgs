@@ -20,9 +20,9 @@ var (
 )
 
 // NewQueryHandler creates a new QueryHandler instance.
-func NewQueryHandler(primitives Primitives) *QueryHandler {
+func NewQueryHandler(converter TypeConverter) *QueryHandler {
 	return &QueryHandler{
-		Primitives: primitives,
+		Converter: converter,
 	}
 }
 

@@ -38,5 +38,5 @@ type Regex struct {
 
 // QueryHandler handles query construction for MongoDB.
 type QueryHandler struct {
-	Primitives Primitives
+	Converter TypeConverter
 }

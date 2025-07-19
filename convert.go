@@ -12,21 +12,23 @@ func Convert(criteria SearchCriteria, qh *QueryHandler) map[string]interface{} {
 
 	switch criteria.Operation {
 	case EQUAL:
-		key := reflect.ValueOf(value).Kind()
-		if key == reflect.Slice {
+		typeOf := reflect.ValueOf(value)
+		switch {
+		case typeOf.Kind() == reflect.Slice:
 			filter[criteria.Key] = buildMongoQuery("$in", value)
-		} else if key == reflect.Struct {
+		case reflect.TypeOf(value).String() == "mgs.Regex":
 			filter[criteria.Key] = buildRegexOperation(value)
-		} else {
+		default:
 			filter[criteria.Key] = value
 		}
 	case NOT_EQUAL:
-		key := reflect.ValueOf(value).Kind()
-		if key == reflect.Slice {
+		typeOf := reflect.ValueOf(value)
+		switch {
+		case typeOf.Kind() == reflect.Slice:
 			filter[criteria.Key] = buildMongoQuery("$nin", value)
-		} else if key == reflect.Struct {
+		case reflect.TypeOf(value).String() == "mgs.Regex":
 			filter[criteria.Key] = buildMongoQuery("$not", buildRegexOperation(value))
-		} else {
+		default:
 			filter[criteria.Key] = buildMongoQuery("$ne", value)
 		}
 	case GREATER_THAN:

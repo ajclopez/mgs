@@ -1,6 +1,7 @@
 package mgs
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -47,27 +48,24 @@ func ParseValue(value string, qh *QueryHandler, cast *CastType) interface{} {
 
 	switch option := *cast; option {
 	case BOOLEAN:
-		if b, err := strconv.ParseBool(value); err == nil {
+		if b, err := parseBool(value); err == nil {
 			return b
 		}
 	case DATE:
-		if datetime, err := time.Parse(DATE_FORMAT, value); err == nil {
+		if datetime, err := parseDateTime(value); err == nil {
 			return datetime
 		}
 	case NUMBER:
-		if integer, err := strconv.ParseInt(value, 10, 64); err == nil {
+		if integer, err := parseInt(value); err == nil {
 			return integer
 		}
 
-		if float, err := strconv.ParseFloat(value, 64); err == nil {
+		if float, err := parseFloat(value); err == nil {
 			return float
 		}
 	case PATTERN:
-		if match := GetRegexPattern().FindStringSubmatch(value); match != nil {
-			return Regex{
-				Pattern: match[GetRegexPattern().SubexpIndex("Pattern")],
-				Option:  match[GetRegexPattern().SubexpIndex("Option")],
-			}
+		if match := parseRegex(value); match != nil {
+			return match
 		}
 	case STRING:
 		return value
@@ -78,50 +76,32 @@ func ParseValue(value string, qh *QueryHandler, cast *CastType) interface{} {
 
 func parseValue(value string, qh *QueryHandler) interface{} {
 
-	if strings.EqualFold(value, "true") || strings.EqualFold(value, "false") {
-		if b, err := strconv.ParseBool(strings.ToLower(value)); err == nil {
-			return b
-		}
+	if result := parseConverter(value, qh); result != nil {
+		return result
 	}
 
-	var err error
+	if b, err := parseBool(value); err == nil {
+		return b
+	}
 
-	var integer int64
-	if integer, err = strconv.ParseInt(value, 10, 64); err == nil {
+	if integer, err := parseInt(value); err == nil {
 		return integer
 	}
 
-	var float float64
-	if float, err = strconv.ParseFloat(value, 64); err == nil {
+	if float, err := parseFloat(value); err == nil {
 		return float
 	}
 
-	var datetime time.Time
-	if datetime, err = time.Parse(DATE_FORMAT, value); err == nil {
+	if datetime, err := parseDateTime(value); err == nil {
 		return datetime
 	}
 
-	list := strings.Split(value, ",")
-	if len(list) > 1 {
-		var characters []interface{}
-		for _, _value := range list {
-			characters = append(characters, parseValue(_value, qh))
-		}
-		if len(characters) > 0 {
-			return characters
-		}
+	if list := parseList(value, qh); list != nil {
+		return list
 	}
 
-	if match := GetRegexPattern().FindStringSubmatch(value); match != nil {
-		return Regex{
-			Pattern: match[GetRegexPattern().SubexpIndex("Pattern")],
-			Option:  match[GetRegexPattern().SubexpIndex("Option")],
-		}
-	}
-
-	objectId, err := qh.Primitives.ObjectID(value)
-	if err == nil {
-		return objectId
+	if match := parseRegex(value); match != nil {
+		return match
 	}
 
 	return value
@@ -133,4 +113,64 @@ func parseIntValueToInt(value string) (int64, error) {
 		return 0, ErrValueNoMatch
 	}
 	return result, nil
+}
+
+func parseBool(value string) (bool, error) {
+	lower := strings.ToLower(value)
+	if lower == "true" || lower == "false" {
+		b, err := strconv.ParseBool(lower)
+		return b, err
+	}
+	return false, fmt.Errorf("invalid boolean value: %s", value)
+}
+
+func parseInt(value string) (int64, error) {
+	i, err := strconv.ParseInt(value, 10, 64)
+	return i, err
+}
+
+func parseFloat(value string) (float64, error) {
+	f, err := strconv.ParseFloat(value, 64)
+	return f, err
+}
+
+func parseDateTime(value string) (time.Time, error) {
+	datetime, err := time.Parse(DATE_FORMAT, value)
+	if err == nil {
+		return datetime, err
+	}
+	return datetime, err
+}
+
+func parseList(value string, qh *QueryHandler) []interface{} {
+	parts := strings.Split(value, ",")
+	if len(parts) > 1 {
+		result := make([]interface{}, 0, len(parts))
+		for _, p := range parts {
+			result = append(result, parseValue(p, qh))
+		}
+		if len(result) > 0 {
+			return result
+		}
+	}
+	return nil
+}
+
+func parseRegex(value string) interface{} {
+	match := GetRegexPattern().FindStringSubmatch(value)
+	if match != nil {
+		return Regex{
+			Pattern: match[GetRegexPattern().SubexpIndex("Pattern")],
+			Option:  match[GetRegexPattern().SubexpIndex("Option")],
+		}
+	}
+	return nil
+}
+
+func parseConverter(value string, qh *QueryHandler) interface{} {
+	if result, err := qh.Converter.Convert(value); err == nil {
+		return result
+	}
+
+	return nil
 }

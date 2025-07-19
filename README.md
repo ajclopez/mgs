@@ -14,7 +14,7 @@
   </p>
 </p>
 
--------------------------
+---
 
 # Mongo Golang Search (mgs)
 
@@ -54,7 +54,40 @@ go get github.com/ajclopez/mgs
 
 ## Usage
 
-To get started with mgs, import the mgs package and implement the Primitives ObjectID function which is used to convert strings to ObjectID.
+To get started with `mgs` **version 2 or later**, implement a `TypeConverter` by creating a struct with a `Convert` method. This allows you to define how to convert primitive values (like ObjectIDs, etc.) from strings.
+
+### 🔧 New Usage (From v2+)
+
+```go
+type TypeConverter struct{}
+
+func (c *TypeConverter) Convert(value string) (interface{}, error) {
+	if id, err := primitive.ObjectIDFromHex(value); err == nil {
+		return id, err
+	}
+	return nil, fmt.Errorf("no conversion matched")
+}
+```
+
+Then create an instance of `QueryHandler`:
+
+```go
+queryHandler := mgs.NewQueryHandler(&TypeConverter{})
+```
+
+Finally use a mgs.MongoGoSearch function:
+
+```go
+queryHandler.MongoGoSearch(query string, opts *FindOptions)
+```
+
+##### Migration
+
+See [migration guide](./MIGRATION_GUIDE.md) for details on upgrading from version 1 to version 2.
+
+---
+
+### ⚠️ Legacy (v1.x.x)
 
 ```go
 type Primitives struct{}
@@ -76,7 +109,7 @@ Finally use a mgs.MongoGoSearch function:
 queryHandler.MongoGoSearch(query string, opts *FindOptions)
 ```
 
-##### Arguments
+#### Arguments
 
 `query`: query string part of the requested API URL.
 
@@ -310,17 +343,15 @@ result, err := mgs.MongoGoSearch("key1=VALUE&key2=10&key3=20&key4=true", opts)
 
 ## Contributing
 
-Should you like to provide any feedback, please open up an Issue, I appreciate feedback and comments. Any contributions you make are **greatly appreciated**.
+Please review the [contributing guide](./CONTRIBUTING.md).
 
-1. Fork the Project
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing-feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## Code of Conduct
+
+This project adheres to the [Contributor Covenant Code of Conduct](./CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
 ## License
 
-This software is released under the MIT license. See `LICENSE` for more information.
+This software is released under the MIT license. See [LICENSE](./LICENSE) for more information.
 
 [license-shield]: https://img.shields.io/badge/License-MIT-yellow.svg
 [license-url]: https://github.com/ajclopez/mgs/blob/master/LICENSE

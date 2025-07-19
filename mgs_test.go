@@ -197,9 +197,9 @@ var tests = []struct {
 }
 
 // MockPrimitives it is a mock of the Primitives for testing.
-type MockPrimitives struct{}
+type MockTypeConverter struct{}
 
-func (mc *MockPrimitives) ObjectID(oidStr string) (interface{}, error) {
+func (mc *MockTypeConverter) Convert(oidStr string) (interface{}, error) {
 	if oidStr == "666f3a3ecf615a0f4d455411" {
 		return fmt.Sprintf("ObjectID(\"%s\")", oidStr), nil
 	}
@@ -207,7 +207,7 @@ func (mc *MockPrimitives) ObjectID(oidStr string) (interface{}, error) {
 	return nil, errors.New("Invalid ObjectId")
 }
 
-var queryHandler = NewQueryHandler(&MockPrimitives{})
+var queryHandler = NewQueryHandler(&MockTypeConverter{})
 
 func TestReturnDefaultQueryForMongoGoSearchWhenQueryIsEmpty(t *testing.T) {
 	result, err := queryHandler.MongoGoSearch("", &FindOptions{})
