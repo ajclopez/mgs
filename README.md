@@ -1,4 +1,4 @@
-[![Go Reference](https://pkg.go.dev/badge/github.com/ajclopez/mgs.svg)](https://pkg.go.dev/github.com/ajclopez/mgs) [![GitHub release (with filter)](https://img.shields.io/github/v/release/ajclopez/mgs)](https://github.com/ajclopez/mgs/releases) [![Go Report](https://goreportcard.com/badge/ajclopez/mgs)](https://goreportcard.com/report/ajclopez/mgs) [![codecov](https://codecov.io/gh/ajclopez/mgs/graph/badge.svg?token=PGKFDNP677)](https://codecov.io/gh/ajclopez/mgs) [![MIT License][license-shield]][license-url]
+[![Go Reference](https://pkg.go.dev/badge/github.com/ajclopez/mgs.svg)](https://pkg.go.dev/github.com/ajclopez/mgs/v2) [![GitHub release (with filter)](https://img.shields.io/github/v/release/ajclopez/mgs)](https://github.com/ajclopez/mgs/releases) [![Go Report](https://goreportcard.com/badge/ajclopez/mgs)](https://goreportcard.com/report/ajclopez/mgs) [![codecov](https://codecov.io/gh/ajclopez/mgs/graph/badge.svg?token=PGKFDNP677)](https://codecov.io/gh/ajclopez/mgs) [![MIT License][license-shield]][license-url]
 
 <p align="center">
   <h3 align="center">Mongo Golang Search</h3>
