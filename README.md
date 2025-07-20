@@ -48,9 +48,16 @@ You could also use **Mongo Golang Search** to searching, sorting, pagination and
 
 The recommended way to get started using the Mongo Golang Search is by using Go modules to install the dependency in your project. This can be done either by importing packages from github.com/ajclopez/mgs and having the build step install the dependency or by explicitly running
 
+For **version 2.x.x**, you can import packages from:
+```go
+go get github.com/ajclopez/mgs/v2
+```
+
+For **version 1.x.x**, you can import packages from:
 ```go
 go get github.com/ajclopez/mgs
 ```
+
 
 ## Usage
 
