@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ajclopez/mgs/parser"
+	"github.com/ajclopez/mgs/v2/parser"
 	"github.com/antlr4-go/antlr/v4"
 )
 

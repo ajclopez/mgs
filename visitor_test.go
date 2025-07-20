@@ -3,7 +3,7 @@ package mgs
 import (
 	"testing"
 
-	"github.com/ajclopez/mgs/parser"
+	"github.com/ajclopez/mgs/v2/parser"
 	"github.com/antlr4-go/antlr/v4"
 
 	"github.com/stretchr/testify/assert"

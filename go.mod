@@ -1,4 +1,4 @@
-module github.com/ajclopez/mgs
+module github.com/ajclopez/mgs/v2
 
 go 1.21.2
 
